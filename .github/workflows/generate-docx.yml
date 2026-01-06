@@ -1,0 +1,39 @@
+name: Generate Business Report DOCX
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate DOCX
+        run: python generate_restep_docx.py
+
+      - name: Commit DOCX to branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B docx-report
+          git add ReStep_Footwear_Business_Plan_Pakistan_Final.docx
+          git commit -m "Add generated business plan DOCX with embedded charts"
+          git push -f origin docx-report
+
+      - name: Upload artifact (downloadable)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReStepFootwearDOCX
+          path: ReStep_Footwear_Business_Plan_Pakistan_Final.docx
